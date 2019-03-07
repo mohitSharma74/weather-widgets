@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React, { Fragment, useState } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import AppBar from "@material-ui/core/AppBar";
@@ -17,6 +17,7 @@ import Main from "./Components/Main";
 import { withStyles } from "@material-ui/core/styles";
 import { extractData, toTitleCase } from "./Util/util";
 import { locations } from "./configs/config";
+import Toggle from "./Components/Toggle";
 
 const styles = theme => ({
   appBar: {
@@ -71,21 +72,13 @@ const styles = theme => ({
   }
 });
 
-class Album extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = { data: {} };
-  }
+const Album = props => {
+  const { data, isLoading, classes, handleChange, currentLoc } = props;
+  const [checked, setChecked] = useState(false);
 
-  static getDerivedStateFromProps(nextProps, nextState) {
-    if (!nextProps.isLoading) {
-      return { data: nextProps.data };
-    }
+  const handleChangeOntoggle = event => setChecked(event.target.checked)
 
-    return null;
-  }
-
-  getCardDescription = ({
+  const getCardDescription = ({
     data: {
       city: { coord, name, population, country }
     }
@@ -96,73 +89,71 @@ class Album extends PureComponent {
       coord.lat
     } and longitude of ${coord.lon}`;
 
-  render() {
-    const { classes, isLoading } = this.props,
-      cardSubtitles = !isLoading ? this.getCardDescription(this.props) : null,
-      dataObj = !isLoading ? extractData(this.state.data) : null;
+  const cardSubtitles = !isLoading ? getCardDescription(props) : null,
+    dataObj = !isLoading ? extractData(data) : null;
 
-    return (
-      <React.Fragment>
-        <CssBaseline />
-        <AppBar
-          position="static"
-          className={classes.appBar}
-          color={classes.color}
-        >
-          <Toolbar>
-            <Cloud className={classes.icon} />
-            <Typography variant="h6" color="inherit" noWrap>
-              Weather Widgets
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        <main>
-          <Main
-            locations={locations}
-            handleChange={this.props.handleChange}
-            currentLoc={this.props.currentLoc}
-          />
-          <div className={classNames(classes.layout, classes.cardGrid)}>
-            {
-              <Grid container spacing={40}>
-                {dataObj
-                  ? dataObj.map((obj, index) => {
-                      const {
-                        description,
-                        dt,
-                        pressure,
-                        population,
-                        temp
-                      } = obj;
-                      return (
-                        <CardGrid
-                          gridKey={index}
-                          cardClasses={classes.card}
-                          title="Image Title"
-                          cardContentClasses={classes.cardContent}
-                          cardHeading={dt}
-                          cardSubtitles={cardSubtitles}
-                          sm={6}
-                          md={4}
-                          lg={3}
-                          description={description}
-                          dt={dt}
-                          pressure={pressure}
-                          population={population}
-                          temp={temp}
-                        />
-                      );
-                    })
-                  : null}
-              </Grid>
-            }
-          </div>
-        </main>
-        <Footer footerClass={styles.footer} />
-      </React.Fragment>
-    );
-  }
-}
+  return (
+    <Fragment>
+      <CssBaseline />
+      <Toggle 
+        checked={checked}
+        handleChange={handleChangeOntoggle}
+        beforeLabel="Dark Mode"
+        afterLabel="Light Mode"
+      />
+      <AppBar
+        position="static"
+        className={classes.appBar}
+        color={classes.color}
+      >
+        <Toolbar>
+          <Cloud className={classes.icon} />
+          <Typography variant="h6" color="inherit" noWrap>
+            Weather Widgets
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <main>
+        <Main
+          locations={locations}
+          handleChange={handleChange}
+          currentLoc={currentLoc}
+        />
+        <div className={classNames(classes.layout, classes.cardGrid)}>
+          {
+            <Grid container spacing={40}>
+              {dataObj
+                ? dataObj.map((obj, index) => {
+                    const { description, dt, pressure, population, temp } = obj;
+                    return (
+                      <CardGrid
+                        image="..."
+                        gridKey={index}
+                        cardClasses={classes.card}
+                        title="Image Title"
+                        cardContentClasses={classes.cardContent}
+                        cardHeading={dt}
+                        cardSubtitles={cardSubtitles}
+                        sm={6}
+                        md={4}
+                        lg={3}
+                        description={description}
+                        dt={dt}
+                        pressure={pressure}
+                        population={population}
+                        temp={temp}
+                      />
+                    );
+                  })
+                : null}
+            </Grid>
+          }
+        </div>
+      </main>
+      <Footer footerClass={styles.footer} />
+    </Fragment>
+  );
+};
 
 Album.propTypes = {
   classes: PropTypes.object.isRequired,

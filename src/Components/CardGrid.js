@@ -21,12 +21,13 @@ const CardGrid = ({
   pressure,
   population,
   temp,
+  image,
   ...rest
 }) => {
   return (
     <Grid item key={gridKey} {...rest}>
       <Card className={cardClasses}>
-        <CardMedia className={cardMediaClasses} title={title} />
+        <CardMedia className={cardMediaClasses} title={title} image={image} />
         <CardContent className={cardContentClasses}>
           <Typography gutterBottom variant="h5" component="h2">
             {cardHeading}
